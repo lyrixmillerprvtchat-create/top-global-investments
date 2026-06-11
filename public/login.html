@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | Top Global Investments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white font-sans min-h-screen flex items-center justify-center px-4">
+
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex items-center gap-2 mb-6">
+        <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-sm">TG</div>
+        <span class="font-bold text-lg">Top Global Investments</span>
+      </a>
+      <h1 class="text-3xl font-bold">Welcome back</h1>
+      <p class="text-gray-400 mt-2">Sign in to your account</p>
+    </div>
+
+    <div id="errorMsg" class="hidden mb-4 p-4 bg-red-900/40 border border-red-700 rounded-xl text-red-300 text-sm"></div>
+
+    <form id="loginForm" class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-5">
+      <div>
+        <label class="block text-sm text-gray-400 mb-1.5">Email Address</label>
+        <input type="email" id="email" required
+          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+          placeholder="you@example.com" />
+      </div>
+      <div>
+        <label class="block text-sm text-gray-400 mb-1.5">Password</label>
+        <input type="password" id="password" required
+          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+          placeholder="••••••••" />
+      </div>
+      <div class="flex items-center justify-between">
+        <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+          <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-600" />
+          Remember me (7 days)
+        </label>
+      </div>
+      <button type="submit" id="submitBtn"
+        class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition disabled:opacity-50">
+        Sign In
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-gray-500 mt-6">
+      Don't have an account?
+      <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium">Create one</a>
+    </p>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in…';
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            remember_me: document.getElementById('rememberMe').checked
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = data.redirect || '/dashboard';
+        } else {
+          errorMsg.textContent = data.error || 'Login failed';
+          errorMsg.classList.remove('hidden');
+        }
+      } catch {
+        errorMsg.textContent = 'Network error. Please try again.';
+        errorMsg.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

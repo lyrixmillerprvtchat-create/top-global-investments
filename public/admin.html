@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | Top Global Investments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white font-sans min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="border-b border-gray-800 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">TG</div>
+        <span class="font-bold">Admin Console</span>
+        <span class="text-xs bg-blue-900/50 text-blue-400 border border-blue-800/50 px-2 py-0.5 rounded-full">Super Admin</span>
+      </div>
+      <button onclick="logout()" class="text-sm text-gray-400 hover:text-white transition">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+        <p class="text-xs text-gray-400 mb-1">Active Users</p>
+        <p class="text-3xl font-bold text-white" id="statApproved">—</p>
+      </div>
+      <div class="bg-gray-900 border border-yellow-900/40 rounded-2xl p-5">
+        <p class="text-xs text-gray-400 mb-1">Pending Approvals</p>
+        <p class="text-3xl font-bold text-yellow-400" id="statPending">—</p>
+      </div>
+      <div class="bg-gray-900 border border-green-900/40 rounded-2xl p-5">
+        <p class="text-xs text-gray-400 mb-1">Pending Deposits</p>
+        <p class="text-3xl font-bold text-green-400" id="statDep">—</p>
+      </div>
+      <div class="bg-gray-900 border border-orange-900/40 rounded-2xl p-5">
+        <p class="text-xs text-gray-400 mb-1">Pending Withdrawals</p>
+        <p class="text-3xl font-bold text-orange-400" id="statWd">—</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-gray-900 rounded-xl p-1 mb-6 overflow-x-auto">
+      <button onclick="switchTab('pendingUsers')" id="tab-pendingUsers" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white">Pending Users</button>
+      <button onclick="switchTab('allUsers')" id="tab-allUsers" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">All Users</button>
+      <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Deposits</button>
+      <button onclick="switchTab('withdrawals')" id="tab-withdrawals" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Withdrawals</button>
+      <button onclick="switchTab('transactions')" id="tab-transactions" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Transactions</button>
+      <button onclick="switchTab('chat')" id="tab-chat" class="tab-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Support Chat</button>
+    </div>
+
+    <!-- Panes -->
+    <div id="pane-pendingUsers" class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">Users Awaiting Approval</div>
+      <div id="pendingUsersList"></div>
+    </div>
+
+    <div id="pane-allUsers" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">All Users</div>
+      <div id="allUsersList"></div>
+    </div>
+
+    <div id="pane-deposits" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+        <span class="text-sm font-medium text-gray-400">Deposit Requests</span>
+        <select id="depStatus" onchange="loadDeposits()" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1 text-sm text-white">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div id="depositsList"></div>
+    </div>
+
+    <div id="pane-withdrawals" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+        <span class="text-sm font-medium text-gray-400">Withdrawal Requests</span>
+        <select id="wdStatus" onchange="loadWithdrawals()" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1 text-sm text-white">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div id="withdrawalsList"></div>
+    </div>
+
+    <div id="pane-transactions" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">All Transactions</div>
+      <div id="transactionsList"></div>
+    </div>
+
+    <div id="pane-chat" class="hidden">
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">Conversations</div>
+          <div id="chatInbox" class="divide-y divide-gray-800"></div>
+        </div>
+        <div class="md:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl flex flex-col" style="height:500px">
+          <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400" id="chatWith">Select a conversation</div>
+          <div id="adminChatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm"></div>
+          <div class="p-3 border-t border-gray-800 flex gap-2" id="chatInputArea" style="display:none">
+            <input id="adminChatInput" type="text" placeholder="Type a message…"
+              class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+              onkeypress="if(event.key==='Enter') sendAdminChat()" />
+            <button onclick="sendAdminChat()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add/Subtract Funds Modal -->
+  <div id="fundsModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-40 px-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6">
+      <h2 class="text-lg font-bold mb-4" id="fundsModalTitle">Adjust Funds</h2>
+      <div id="fundsError" class="hidden mb-3 p-3 bg-red-900/40 border border-red-700 rounded-lg text-red-300 text-sm"></div>
+      <form id="fundsForm" class="space-y-4">
+        <input type="hidden" id="fundsUserId" />
+        <input type="hidden" id="fundsAction" />
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Amount (USD)</label>
+          <input type="number" id="fundsAmount" min="0.01" step="0.01" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1">Reason (optional)</label>
+          <input type="text" id="fundsReason"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            placeholder="e.g., Bonus credit" />
+        </div>
+        <div class="flex gap-3">
+          <button type="button" onclick="closeFundsModal()" class="flex-1 py-2.5 border border-gray-700 rounded-xl text-gray-400 hover:text-white transition text-sm">Cancel</button>
+          <button type="submit" id="fundsSubmit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition text-sm disabled:opacity-50">Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://epdzbjsecfsyfhknfbca.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZHpianNlY2ZzeWZoa25mYmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3ODU1ODcsImV4cCI6MjA5NjM2MTU4N30.BzLzojk5Oi7xS-CHuRK4_QYHgKy6T3Dq90yJQP2RAb4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let selectedChatUserId = null;
+    let adminId = null;
+
+    async function init() {
+      const res = await fetch('/api/me');
+      if (!res.ok) { window.location.href = '/login'; return; }
+      const me = await res.json();
+      if (!me.is_admin) { window.location.href = '/dashboard'; return; }
+      adminId = me.id;
+      loadStats();
+      loadPendingUsers();
+      initRealtimeChat();
+    }
+
+    async function loadStats() {
+      const r = await fetch('/admin/stats');
+      const d = await r.json();
+      document.getElementById('statApproved').textContent = d.approvedUsers ?? 0;
+      document.getElementById('statPending').textContent = d.pendingUsers ?? 0;
+      document.getElementById('statDep').textContent = d.pendingDeposits ?? 0;
+      document.getElementById('statWd').textContent = d.pendingWithdrawals ?? 0;
+    }
+
+    function switchTab(tab) {
+      const tabs = ['pendingUsers','allUsers','deposits','withdrawals','transactions','chat'];
+      tabs.forEach(t => {
+        document.getElementById('pane-'+t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('tab-'+t);
+        if (t === tab) { btn.classList.add('bg-gray-800','text-white'); btn.classList.remove('text-gray-400'); }
+        else { btn.classList.remove('bg-gray-800','text-white'); btn.classList.add('text-gray-400'); }
+      });
+      if (tab === 'allUsers') loadAllUsers();
+      if (tab === 'deposits') loadDeposits();
+      if (tab === 'withdrawals') loadWithdrawals();
+      if (tab === 'transactions') loadTransactions();
+      if (tab === 'chat') loadChatInbox();
+    }
+
+    function statusBadge(s) {
+      const map = { pending:'bg-yellow-900/50 text-yellow-400', approved:'bg-green-900/50 text-green-400', rejected:'bg-red-900/50 text-red-400' };
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${map[s]||''}">${s}</span>`;
+    }
+
+    async function loadPendingUsers() {
+      const r = await fetch('/admin/users?status=pending');
+      const data = await r.json();
+      const el = document.getElementById('pendingUsersList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No pending users</div>'; return; }
+      el.innerHTML = data.map(u => `
+        <div class="p-5 border-b border-gray-800 last:border-0">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="font-medium">${u.full_name}</p>
+              <p class="text-sm text-gray-400">${u.email}</p>
+              ${u.phone ? `<p class="text-xs text-gray-500">${u.phone}</p>` : ''}
+              <p class="text-xs text-gray-500 mt-1">Registered: ${new Date(u.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="approveUser('${u.id}')" class="px-3 py-1.5 bg-green-700 hover:bg-green-600 rounded-lg text-sm font-medium transition">Approve</button>
+            <button onclick="rejectUser('${u.id}')" class="px-3 py-1.5 bg-red-900/60 hover:bg-red-800 rounded-lg text-sm font-medium transition">Reject</button>
+          </div>
+        </div>`).join('');
+    }
+
+    async function loadAllUsers() {
+      const r = await fetch('/admin/users');
+      const data = await r.json();
+      const el = document.getElementById('allUsersList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No users</div>'; return; }
+      el.innerHTML = data.map(u => `
+        <div class="p-5 border-b border-gray-800 last:border-0">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-0.5">
+                <p class="font-medium">${u.full_name}</p>
+                ${u.is_admin ? '<span class="text-xs bg-blue-900/60 text-blue-400 px-1.5 py-0.5 rounded">Admin</span>' : ''}
+                ${u.is_banned ? '<span class="text-xs bg-red-900/60 text-red-400 px-1.5 py-0.5 rounded">Banned</span>' : ''}
+                ${u.is_approved && !u.is_banned ? '<span class="text-xs bg-green-900/60 text-green-400 px-1.5 py-0.5 rounded">Active</span>' : ''}
+              </div>
+              <p class="text-sm text-gray-400">${u.email}</p>
+              <p class="text-sm font-semibold text-blue-400 mt-1">Balance: $${parseFloat(u.balance||0).toFixed(2)}</p>
+            </div>
+            <div class="flex flex-col gap-1.5 ml-4">
+              <button onclick="openFundsModal('${u.id}','add')" class="px-2.5 py-1 bg-green-900/50 hover:bg-green-800 text-green-400 rounded text-xs transition">+ Add Funds</button>
+              <button onclick="openFundsModal('${u.id}','subtract')" class="px-2.5 py-1 bg-red-900/50 hover:bg-red-800 text-red-400 rounded text-xs transition">− Subtract</button>
+              ${u.is_banned
+                ? `<button onclick="unbanUser('${u.id}')" class="px-2.5 py-1 bg-blue-900/50 hover:bg-blue-800 text-blue-400 rounded text-xs transition">Unban</button>`
+                : u.is_admin ? '' : `<button onclick="banUser('${u.id}')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded text-xs transition">Ban</button>`}
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    async function approveUser(id) {
+      if (!confirm('Approve this user?')) return;
+      await fetch('/admin/users/'+id+'/approve', { method:'POST' });
+      loadStats(); loadPendingUsers();
+    }
+    async function rejectUser(id) {
+      const reason = prompt('Reason for rejection (optional):');
+      await fetch('/admin/users/'+id+'/reject', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reason}) });
+      loadPendingUsers();
+    }
+    async function banUser(id) {
+      if (!confirm('Ban this user?')) return;
+      await fetch('/admin/users/'+id+'/ban', { method:'POST' });
+      loadAllUsers();
+    }
+    async function unbanUser(id) {
+      await fetch('/admin/users/'+id+'/unban', { method:'POST' });
+      loadAllUsers();
+    }
+
+    function openFundsModal(userId, action) {
+      document.getElementById('fundsUserId').value = userId;
+      document.getElementById('fundsAction').value = action;
+      document.getElementById('fundsModalTitle').textContent = action === 'add' ? 'Add Funds to Account' : 'Subtract Funds from Account';
+      document.getElementById('fundsAmount').value = '';
+      document.getElementById('fundsReason').value = '';
+      document.getElementById('fundsError').classList.add('hidden');
+      document.getElementById('fundsModal').classList.remove('hidden');
+    }
+    function closeFundsModal() { document.getElementById('fundsModal').classList.add('hidden'); }
+
+    document.getElementById('fundsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userId = document.getElementById('fundsUserId').value;
+      const action = document.getElementById('fundsAction').value;
+      const amount = document.getElementById('fundsAmount').value;
+      const reason = document.getElementById('fundsReason').value;
+      const err = document.getElementById('fundsError');
+      const btn = document.getElementById('fundsSubmit');
+      btn.disabled = true; btn.textContent = 'Processing…';
+      try {
+        const r = await fetch('/admin/users/'+userId+'/'+action+'-funds', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({amount, reason})
+        });
+        const d = await r.json();
+        if (d.success) { closeFundsModal(); loadAllUsers(); loadStats(); }
+        else { err.textContent = d.error; err.classList.remove('hidden'); }
+      } finally { btn.disabled = false; btn.textContent = 'Confirm'; }
+    });
+
+    async function loadDeposits() {
+      const status = document.getElementById('depStatus').value;
+      const r = await fetch('/admin/deposits?status='+status);
+      const data = await r.json();
+      const el = document.getElementById('depositsList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No deposits</div>'; return; }
+      el.innerHTML = data.map(d => `
+        <div class="p-5 border-b border-gray-800 last:border-0">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="font-semibold text-green-400">$${parseFloat(d.amount).toFixed(2)}</p>
+              <p class="text-sm text-gray-300">${d.users?.full_name} &bull; ${d.users?.email}</p>
+              <p class="text-xs text-gray-500">${d.payment_method.replace('_',' ')} &bull; ${new Date(d.created_at).toLocaleString()}</p>
+              ${d.reference_notes ? `<p class="text-xs text-gray-500 mt-0.5">Ref: ${d.reference_notes}</p>` : ''}
+            </div>
+            <div class="flex flex-col gap-1.5 ml-4">
+              ${d.status === 'pending' ? `
+                <button onclick="approveDep(${d.id})" class="px-3 py-1 bg-green-700 hover:bg-green-600 rounded text-xs font-medium transition">Approve</button>
+                <button onclick="rejectDep(${d.id})" class="px-3 py-1 bg-red-900/60 hover:bg-red-800 rounded text-xs font-medium transition">Reject</button>
+              ` : statusBadge(d.status)}
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    async function approveDep(id) {
+      const r = await fetch('/admin/deposits/'+id+'/approve', { method:'POST' });
+      const d = await r.json();
+      if (d.success) { loadDeposits(); loadStats(); alert('Deposit approved. New balance: $'+parseFloat(d.new_balance).toFixed(2)); }
+      else alert('Error: ' + d.error);
+    }
+    async function rejectDep(id) {
+      const reason = prompt('Reason (optional):');
+      await fetch('/admin/deposits/'+id+'/reject', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reason}) });
+      loadDeposits();
+    }
+
+    async function loadWithdrawals() {
+      const status = document.getElementById('wdStatus').value;
+      const r = await fetch('/admin/withdrawals?status='+status);
+      const data = await r.json();
+      const el = document.getElementById('withdrawalsList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No withdrawals</div>'; return; }
+      el.innerHTML = data.map(w => `
+        <div class="p-5 border-b border-gray-800 last:border-0">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="font-semibold text-orange-400">$${parseFloat(w.amount).toFixed(2)}</p>
+              <p class="text-sm text-gray-300">${w.users?.full_name} &bull; $${parseFloat(w.users?.balance||0).toFixed(2)} balance</p>
+              <p class="text-xs text-gray-500">${w.withdrawal_method} &bull; ${new Date(w.created_at).toLocaleString()}</p>
+              <p class="text-xs text-gray-500 mt-0.5 break-all">To: ${w.destination_details}</p>
+            </div>
+            <div class="flex flex-col gap-1.5 ml-4">
+              ${w.status === 'pending' ? `
+                <button onclick="approveWd(${w.id})" class="px-3 py-1 bg-green-700 hover:bg-green-600 rounded text-xs font-medium transition">Approve</button>
+                <button onclick="rejectWd(${w.id})" class="px-3 py-1 bg-red-900/60 hover:bg-red-800 rounded text-xs font-medium transition">Reject</button>
+              ` : statusBadge(w.status)}
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    async function approveWd(id) {
+      const r = await fetch('/admin/withdrawals/'+id+'/approve', { method:'POST' });
+      const d = await r.json();
+      if (d.success) { loadWithdrawals(); loadStats(); alert('Withdrawal approved. New balance: $'+parseFloat(d.new_balance).toFixed(2)); }
+      else alert('Error: ' + d.error);
+    }
+    async function rejectWd(id) {
+      const reason = prompt('Reason (optional):');
+      await fetch('/admin/withdrawals/'+id+'/reject', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({reason}) });
+      loadWithdrawals();
+    }
+
+    async function loadTransactions() {
+      const r = await fetch('/admin/transactions');
+      const data = await r.json();
+      const el = document.getElementById('transactionsList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No transactions</div>'; return; }
+      el.innerHTML = data.map(t => `
+        <div class="flex items-center justify-between p-4 border-b border-gray-800 last:border-0">
+          <div>
+            <p class="text-sm font-medium">${t.users?.full_name || 'Unknown'}</p>
+            <p class="text-xs text-gray-500">${t.description || t.type} &bull; ${new Date(t.created_at).toLocaleString()}</p>
+          </div>
+          <span class="font-semibold text-sm ${t.amount >= 0 ? 'text-green-400' : 'text-red-400'}">${t.amount >= 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}</span>
+        </div>`).join('');
+    }
+
+    async function loadChatInbox() {
+      const r = await fetch('/chat/inbox');
+      const data = await r.json();
+      const el = document.getElementById('chatInbox');
+      if (!data.length) { el.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm">No conversations</div>'; return; }
+      el.innerHTML = data.map(u => `
+        <div onclick="openConversation('${u.id}','${u.full_name}')" class="p-4 hover:bg-gray-800 cursor-pointer border-b border-gray-800 last:border-0 transition">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium">${u.full_name}</p>
+            ${u.unread > 0 ? `<span class="w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">${u.unread}</span>` : ''}
+          </div>
+          <p class="text-xs text-gray-500">${u.email}</p>
+        </div>`).join('');
+    }
+
+    async function openConversation(userId, name) {
+      selectedChatUserId = userId;
+      document.getElementById('chatWith').textContent = 'Chat with ' + name;
+      document.getElementById('chatInputArea').style.display = 'flex';
+      const r = await fetch('/chat/messages?user_id=' + userId);
+      const msgs = await r.json();
+      renderAdminChat(msgs);
+    }
+
+    function renderAdminChat(msgs) {
+      const el = document.getElementById('adminChatMessages');
+      if (!msgs.length) { el.innerHTML = '<p class="text-center text-gray-500 text-xs">No messages</p>'; return; }
+      el.innerHTML = msgs.map(m => {
+        const mine = m.from_user_id === adminId;
+        return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[85%] px-3 py-2 rounded-xl text-xs ${mine ? 'bg-blue-700 text-white' : 'bg-gray-800 text-gray-200'}">
+            ${m.message}
+            <div class="text-[10px] opacity-60 mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function sendAdminChat() {
+      if (!selectedChatUserId) return;
+      const input = document.getElementById('adminChatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      await fetch('/chat/messages', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: msg, to_user_id: selectedChatUserId })
+      });
+      openConversation(selectedChatUserId, document.getElementById('chatWith').textContent.replace('Chat with ',''));
+    }
+
+    function initRealtimeChat() {
+      sb.channel('admin-support')
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'support_messages' }, () => {
+          loadChatInbox();
+          if (selectedChatUserId) openConversation(selectedChatUserId, document.getElementById('chatWith').textContent.replace('Chat with ',''));
+        })
+        .subscribe();
+    }
+
+    async function logout() {
+      await fetch('/auth/logout', { method:'POST' });
+      window.location.href = '/login';
+    }
+
+    init();
+  </script>
+</body>
+</html>

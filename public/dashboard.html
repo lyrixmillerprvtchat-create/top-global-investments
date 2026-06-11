@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Top Global Investments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white font-sans min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="border-b border-gray-800 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm">TG</div>
+        <span class="font-bold">Top Global Investments</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-400">Welcome, <span id="userName" class="text-white font-medium"></span></span>
+        <button onclick="logout()" class="text-sm text-gray-400 hover:text-white transition">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Balance Card -->
+    <div class="bg-gradient-to-br from-blue-900/60 to-blue-800/30 border border-blue-800/50 rounded-2xl p-8 mb-8">
+      <p class="text-sm text-blue-300 mb-1">Available Balance</p>
+      <p class="text-5xl font-bold" id="balance">$0.00</p>
+      <p class="text-sm text-gray-400 mt-3" id="memberSince"></p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <button onclick="showModal('deposit')"
+        class="bg-gray-900 border border-gray-800 hover:border-blue-700 rounded-2xl p-6 text-left transition group">
+        <div class="w-10 h-10 bg-green-900/50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-green-800/70 transition">
+          <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1">Deposit Funds</h3>
+        <p class="text-sm text-gray-400">Min $10 • Max $50,000</p>
+      </button>
+      <button onclick="showModal('withdraw')"
+        class="bg-gray-900 border border-gray-800 hover:border-blue-700 rounded-2xl p-6 text-left transition group">
+        <div class="w-10 h-10 bg-orange-900/50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-orange-800/70 transition">
+          <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1">Withdraw Funds</h3>
+        <p class="text-sm text-gray-400">Min $20 • Max $10,000/day</p>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 bg-gray-900 rounded-xl p-1 mb-6 w-fit">
+      <button onclick="switchTab('transactions')" id="tab-transactions" class="tab-btn px-5 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white">Transactions</button>
+      <button onclick="switchTab('deposits')" id="tab-deposits" class="tab-btn px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Deposits</button>
+      <button onclick="switchTab('withdrawals')" id="tab-withdrawals" class="tab-btn px-5 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition">Withdrawals</button>
+    </div>
+
+    <!-- Transactions Table -->
+    <div id="pane-transactions" class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">Recent Transactions</div>
+      <div id="txList" class="divide-y divide-gray-800">
+        <div class="p-8 text-center text-gray-500">Loading…</div>
+      </div>
+    </div>
+    <div id="pane-deposits" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">Deposit Requests</div>
+      <div id="depList" class="divide-y divide-gray-800">
+        <div class="p-8 text-center text-gray-500">Loading…</div>
+      </div>
+    </div>
+    <div id="pane-withdrawals" class="hidden bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 text-sm font-medium text-gray-400">Withdrawal Requests</div>
+      <div id="wdList" class="divide-y divide-gray-800">
+        <div class="p-8 text-center text-gray-500">Loading…</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Deposit Modal -->
+  <div id="depositModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-40 px-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-8">
+      <h2 class="text-xl font-bold mb-6">Request Deposit</h2>
+      <div id="depositError" class="hidden mb-4 p-3 bg-red-900/40 border border-red-700 rounded-lg text-red-300 text-sm"></div>
+      <div id="depositSuccess" class="hidden mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm"></div>
+      <form id="depositForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Amount (USD)</label>
+          <input type="number" id="depAmount" min="10" max="50000" step="0.01" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            placeholder="Min $10 — Max $50,000" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Payment Method</label>
+          <select id="depMethod" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+            <option value="bank_transfer">Bank Transfer</option>
+            <option value="crypto">Cryptocurrency</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Reference / Notes (optional)</label>
+          <input type="text" id="depNotes"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            placeholder="Transaction reference..." />
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeModal('deposit')" class="flex-1 py-3 border border-gray-700 rounded-xl text-gray-400 hover:text-white transition">Cancel</button>
+          <button type="submit" id="depSubmit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition disabled:opacity-50">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div id="withdrawModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-40 px-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-8">
+      <h2 class="text-xl font-bold mb-6">Request Withdrawal</h2>
+      <div id="wdError" class="hidden mb-4 p-3 bg-red-900/40 border border-red-700 rounded-lg text-red-300 text-sm"></div>
+      <div id="wdSuccess" class="hidden mb-4 p-3 bg-green-900/40 border border-green-700 rounded-lg text-green-300 text-sm"></div>
+      <form id="wdForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Amount (USD)</label>
+          <input type="number" id="wdAmount" min="20" max="10000" step="0.01" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500"
+            placeholder="Min $20 — Max $10,000/day" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Withdrawal Method</label>
+          <select id="wdMethod" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500">
+            <option value="bank">Bank Transfer</option>
+            <option value="crypto">Cryptocurrency</option>
+            <option value="cash">Cash</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-400 mb-1.5">Destination Details</label>
+          <textarea id="wdDest" required rows="2"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 resize-none"
+            placeholder="Bank account, wallet address, etc."></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeModal('withdraw')" class="flex-1 py-3 border border-gray-700 rounded-xl text-gray-400 hover:text-white transition">Cancel</button>
+          <button type="submit" id="wdSubmit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition disabled:opacity-50">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat Bubble -->
+  <div id="chatBubble" class="fixed bottom-6 right-6 z-50">
+    <div id="chatWindow" class="hidden mb-3 w-80 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl flex flex-col" style="height:420px">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-green-400" id="chatStatus"></div>
+          <span class="text-sm font-semibold">Support Chat</span>
+        </div>
+        <button onclick="toggleChat()" class="text-gray-500 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm"></div>
+      <div class="p-3 border-t border-gray-800 flex gap-2">
+        <input id="chatInput" type="text" placeholder="Type a message…"
+          class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+          onkeypress="if(event.key==='Enter') sendChat()" />
+        <button onclick="sendChat()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="relative">
+      <button onclick="toggleChat()" class="w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full shadow-lg flex items-center justify-center transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+      </button>
+      <span id="unreadBadge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold"></span>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://epdzbjsecfsyfhknfbca.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZHpianNlY2ZzeWZoa25mYmNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3ODU1ODcsImV4cCI6MjA5NjM2MTU4N30.BzLzojk5Oi7xS-CHuRK4_QYHgKy6T3Dq90yJQP2RAb4';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUser = null;
+
+    async function init() {
+      const res = await fetch('/api/me');
+      if (!res.ok) { window.location.href = '/login'; return; }
+      currentUser = await res.json();
+      document.getElementById('userName').textContent = currentUser.full_name;
+      document.getElementById('balance').textContent = '$' + parseFloat(currentUser.balance).toLocaleString('en-US', {minimumFractionDigits: 2});
+      document.getElementById('memberSince').textContent = 'Member since ' + new Date(currentUser.created_at).toLocaleDateString('en-US', {year:'numeric',month:'long'});
+      loadTransactions();
+      initChat();
+    }
+
+    function switchTab(tab) {
+      ['transactions','deposits','withdrawals'].forEach(t => {
+        document.getElementById('pane-'+t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('tab-'+t);
+        if (t === tab) { btn.classList.add('bg-gray-800','text-white'); btn.classList.remove('text-gray-400'); }
+        else { btn.classList.remove('bg-gray-800','text-white'); btn.classList.add('text-gray-400'); }
+      });
+      if (tab === 'deposits') loadDeposits();
+      if (tab === 'withdrawals') loadWithdrawals();
+    }
+
+    function statusBadge(s) {
+      const map = { pending: 'bg-yellow-900/50 text-yellow-400', approved: 'bg-green-900/50 text-green-400', rejected: 'bg-red-900/50 text-red-400' };
+      return `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${map[s] || ''}">${s}</span>`;
+    }
+
+    async function loadTransactions() {
+      const res = await fetch('/api/transactions');
+      const data = await res.json();
+      const el = document.getElementById('txList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No transactions yet</div>'; return; }
+      el.innerHTML = data.map(t => `
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-medium">${t.description || t.type}</p>
+            <p class="text-xs text-gray-500">${new Date(t.created_at).toLocaleString()}</p>
+          </div>
+          <span class="font-semibold ${t.amount >= 0 ? 'text-green-400' : 'text-red-400'}">${t.amount >= 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}</span>
+        </div>`).join('');
+    }
+
+    async function loadDeposits() {
+      const res = await fetch('/deposits');
+      const data = await res.json();
+      const el = document.getElementById('depList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No deposit requests yet</div>'; return; }
+      el.innerHTML = data.map(d => `
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-medium">$${parseFloat(d.amount).toFixed(2)} via ${d.payment_method.replace('_',' ')}</p>
+            <p class="text-xs text-gray-500">${new Date(d.created_at).toLocaleString()}</p>
+          </div>
+          ${statusBadge(d.status)}
+        </div>`).join('');
+    }
+
+    async function loadWithdrawals() {
+      const res = await fetch('/withdrawals');
+      const data = await res.json();
+      const el = document.getElementById('wdList');
+      if (!data.length) { el.innerHTML = '<div class="p-8 text-center text-gray-500">No withdrawal requests yet</div>'; return; }
+      el.innerHTML = data.map(w => `
+        <div class="flex items-center justify-between px-5 py-4">
+          <div>
+            <p class="text-sm font-medium">$${parseFloat(w.amount).toFixed(2)} via ${w.withdrawal_method}</p>
+            <p class="text-xs text-gray-500">${new Date(w.created_at).toLocaleString()}</p>
+          </div>
+          ${statusBadge(w.status)}
+        </div>`).join('');
+    }
+
+    function showModal(type) {
+      document.getElementById(type === 'deposit' ? 'depositModal' : 'withdrawModal').classList.remove('hidden');
+    }
+    function closeModal(type) {
+      document.getElementById(type === 'deposit' ? 'depositModal' : 'withdrawModal').classList.add('hidden');
+    }
+
+    document.getElementById('depositForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('depositError');
+      const suc = document.getElementById('depositSuccess');
+      err.classList.add('hidden'); suc.classList.add('hidden');
+      const btn = document.getElementById('depSubmit');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch('/deposits', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: document.getElementById('depAmount').value, payment_method: document.getElementById('depMethod').value, reference_notes: document.getElementById('depNotes').value })
+        });
+        const data = await res.json();
+        if (data.success) { suc.textContent = 'Deposit request submitted!'; suc.classList.remove('hidden'); loadDeposits(); }
+        else { err.textContent = data.error; err.classList.remove('hidden'); }
+      } catch { err.textContent = 'Network error'; err.classList.remove('hidden'); }
+      finally { btn.disabled = false; btn.textContent = 'Submit'; }
+    });
+
+    document.getElementById('wdForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const err = document.getElementById('wdError');
+      const suc = document.getElementById('wdSuccess');
+      err.classList.add('hidden'); suc.classList.add('hidden');
+      const btn = document.getElementById('wdSubmit');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch('/withdrawals', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: document.getElementById('wdAmount').value, withdrawal_method: document.getElementById('wdMethod').value, destination_details: document.getElementById('wdDest').value })
+        });
+        const data = await res.json();
+        if (data.success) { suc.textContent = 'Withdrawal request submitted!'; suc.classList.remove('hidden'); loadWithdrawals(); }
+        else { err.textContent = data.error; err.classList.remove('hidden'); }
+      } catch { err.textContent = 'Network error'; err.classList.remove('hidden'); }
+      finally { btn.disabled = false; btn.textContent = 'Submit'; }
+    });
+
+    async function logout() {
+      await fetch('/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
+    }
+
+    // Chat
+    let chatOpen = false;
+    let chatChannel = null;
+
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      document.getElementById('chatWindow').classList.toggle('hidden', !chatOpen);
+      if (chatOpen) { loadChatMessages(); document.getElementById('unreadBadge').classList.add('hidden'); }
+    }
+
+    async function loadChatMessages() {
+      const res = await fetch('/chat/messages');
+      const msgs = await res.json();
+      renderMessages(msgs);
+    }
+
+    function renderMessages(msgs) {
+      const el = document.getElementById('chatMessages');
+      if (!msgs.length) { el.innerHTML = '<p class="text-center text-gray-500 text-xs">No messages yet. Say hi!</p>'; return; }
+      el.innerHTML = msgs.map(m => {
+        const mine = m.from_user_id === currentUser?.id;
+        return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[85%] px-3 py-2 rounded-xl text-xs ${mine ? 'bg-blue-700 text-white' : 'bg-gray-800 text-gray-200'}">
+            ${m.message}
+            <div class="text-[10px] opacity-60 mt-1">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      await fetch('/chat/messages', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      loadChatMessages();
+    }
+
+    function initChat() {
+      chatChannel = sb.channel('support-user-' + currentUser.id)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => {
+          if (chatOpen) loadChatMessages();
+          else {
+            const badge = document.getElementById('unreadBadge');
+            badge.classList.remove('hidden');
+            badge.textContent = parseInt(badge.textContent || '0') + 1;
+          }
+        })
+        .subscribe((status) => {
+          const dot = document.getElementById('chatStatus');
+          dot.className = 'w-2 h-2 rounded-full ' + (status === 'SUBSCRIBED' ? 'bg-green-400' : 'bg-yellow-400');
+        });
+    }
+
+    init();
+  </script>
+</body>
+</html>
