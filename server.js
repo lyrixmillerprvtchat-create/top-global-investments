@@ -1,8 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const PgSession = require('connect-pg-simple')(session);
-const { Pool } = require('pg');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
@@ -12,20 +10,16 @@ const withdrawalRoutes = require('./routes/withdrawals');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const { supabase } = require('./lib/db');
+const SupabaseSessionStore = require('./lib/sessionStore');
 
 const app = express();
 
-const pgPool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  max: 3
-});
-
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  store: new PgSession({ pool: pgPool, tableName: 'session', createTableIfMissing: false }),
+  store: new SupabaseSessionStore(supabase),
   name: 'tgi.sid',
   secret: process.env.SESSION_SECRET || 'tgi-default-secret',
   resave: false,
@@ -33,6 +27,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 30 * 60 * 1000
   }
 }));
