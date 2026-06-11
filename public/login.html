@@ -5,62 +5,150 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In | Top Global Investments</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
 </head>
-<body class="bg-gray-950 text-white font-sans min-h-screen flex items-center justify-center px-4">
+<body class="bg-gray-950 text-white min-h-screen flex" style="font-family:'Inter',sans-serif">
 
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
-      <a href="/" class="inline-flex items-center gap-2 mb-6">
-        <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-sm">TG</div>
-        <span class="font-bold text-lg">Top Global Investments</span>
+  <!-- Left panel — brand / marketing -->
+  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0c1445 100%)">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-20 left-20 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-32 right-10 w-64 h-64 bg-purple-600/15 rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative">
+      <a href="/" class="inline-flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white" style="background: linear-gradient(135deg,#1d4ed8,#7c3aed)">TG</div>
+        <div>
+          <div class="font-bold text-base leading-tight">Top Global Investments</div>
+          <div class="text-[10px] text-blue-400 leading-tight tracking-widest uppercase">Est. 2004 · Licensed & Regulated</div>
+        </div>
       </a>
-      <h1 class="text-3xl font-bold">Welcome back</h1>
-      <p class="text-gray-400 mt-2">Sign in to your account</p>
+    </div>
+    <div class="relative">
+      <blockquote class="text-2xl font-semibold leading-snug mb-6 text-white/90">"The greatest investment you can make is in yourself — and your future."</blockquote>
+      <div class="space-y-4">
+        <div class="flex items-center gap-3 text-sm text-gray-300">
+          <div class="w-8 h-8 rounded-lg bg-green-900/50 border border-green-800/50 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          21 million active investors worldwide
+        </div>
+        <div class="flex items-center gap-3 text-sm text-gray-300">
+          <div class="w-8 h-8 rounded-lg bg-green-900/50 border border-green-800/50 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          $485B+ in assets under management
+        </div>
+        <div class="flex items-center gap-3 text-sm text-gray-300">
+          <div class="w-8 h-8 rounded-lg bg-green-900/50 border border-green-800/50 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          20+ years of proven, trusted excellence
+        </div>
+      </div>
+    </div>
+    <div class="relative text-xs text-gray-600">© 2024 Top Global Investments LLC · SEC Registered · FINRA Member</div>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="flex-1 flex flex-col items-center justify-center px-6 py-12 relative">
+    <!-- Back button -->
+    <div class="absolute top-6 left-6">
+      <a href="/" class="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition group">
+        <svg class="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Home
+      </a>
     </div>
 
-    <div id="errorMsg" class="hidden mb-4 p-4 bg-red-900/40 border border-red-700 rounded-xl text-red-300 text-sm"></div>
+    <div class="w-full max-w-md">
+      <!-- Mobile logo -->
+      <div class="lg:hidden text-center mb-8">
+        <a href="/" class="inline-flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm text-white" style="background: linear-gradient(135deg,#1d4ed8,#7c3aed)">TG</div>
+          <span class="font-bold text-base">Top Global Investments</span>
+        </a>
+      </div>
 
-    <form id="loginForm" class="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-5">
-      <div>
-        <label class="block text-sm text-gray-400 mb-1.5">Email Address</label>
-        <input type="email" id="email" required
-          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-          placeholder="you@example.com" />
+      <div class="mb-8">
+        <h1 class="text-3xl font-black mb-2">Welcome back</h1>
+        <p class="text-gray-400">Sign in to access your investment portfolio</p>
       </div>
-      <div>
-        <label class="block text-sm text-gray-400 mb-1.5">Password</label>
-        <input type="password" id="password" required
-          class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-          placeholder="••••••••" />
-      </div>
-      <div class="flex items-center justify-between">
-        <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-          <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-600" />
-          Remember me (7 days)
-        </label>
-      </div>
-      <button type="submit" id="submitBtn"
-        class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition disabled:opacity-50">
-        Sign In
-      </button>
-    </form>
 
-    <p class="text-center text-sm text-gray-500 mt-6">
-      Don't have an account?
-      <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium">Create one</a>
-    </p>
+      <div id="errorMsg" class="hidden mb-5 p-4 bg-red-900/30 border border-red-800/60 rounded-xl text-red-300 text-sm flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        <span id="errorText"></span>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+          <input type="email" id="email" required autocomplete="email"
+            class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition text-sm"
+            placeholder="you@example.com" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+          <div class="relative">
+            <input type="password" id="password" required autocomplete="current-password"
+              class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition text-sm pr-10"
+              placeholder="••••••••" />
+            <button type="button" onclick="togglePwd()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition">
+              <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+            <input type="checkbox" id="rememberMe" class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-600" />
+            Remember me for 7 days
+          </label>
+          <a href="#" class="text-sm text-blue-400 hover:text-blue-300 transition">Forgot password?</a>
+        </div>
+        <button type="submit" id="submitBtn"
+          class="w-full py-3.5 rounded-xl font-bold text-sm text-white transition hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+          style="background: linear-gradient(135deg,#1d4ed8,#7c3aed)">
+          <svg id="btnSpinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="30 70" stroke-linecap="round"/></svg>
+          <span id="btnText">Sign In to Portfolio</span>
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-500">Don't have an account? <a href="/register" class="text-blue-400 hover:text-blue-300 font-semibold transition">Create free account</a></p>
+      </div>
+
+      <div class="mt-8 flex items-center gap-3">
+        <div class="flex-1 h-px bg-gray-800"></div>
+        <span class="text-xs text-gray-600">SECURED BY</span>
+        <div class="flex-1 h-px bg-gray-800"></div>
+      </div>
+      <div class="mt-3 flex items-center justify-center gap-4 text-xs text-gray-600">
+        <span>256-bit SSL</span><span>·</span><span>2FA Protected</span><span>·</span><span>SIPC Insured</span>
+      </div>
+    </div>
   </div>
 
   <script>
+    function togglePwd() {
+      const p = document.getElementById('password');
+      p.type = p.type === 'password' ? 'text' : 'password';
+    }
+
     const form = document.getElementById('loginForm');
     const errorMsg = document.getElementById('errorMsg');
+    const errorText = document.getElementById('errorText');
     const submitBtn = document.getElementById('submitBtn');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.classList.add('hidden');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Signing in…';
+      btnSpinner.classList.remove('hidden');
+      btnText.textContent = 'Signing in…';
 
       try {
         const res = await fetch('/auth/login', {
@@ -76,15 +164,16 @@
         if (data.success) {
           window.location.href = data.redirect || '/dashboard';
         } else {
-          errorMsg.textContent = data.error || 'Login failed';
+          errorText.textContent = data.error || 'Invalid credentials. Please try again.';
           errorMsg.classList.remove('hidden');
         }
       } catch {
-        errorMsg.textContent = 'Network error. Please try again.';
+        errorText.textContent = 'Network error. Please try again.';
         errorMsg.classList.remove('hidden');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
+        btnSpinner.classList.add('hidden');
+        btnText.textContent = 'Sign In to Portfolio';
       }
     });
   </script>
