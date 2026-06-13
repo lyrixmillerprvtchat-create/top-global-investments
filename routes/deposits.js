@@ -51,7 +51,7 @@ router.post('/', requireAuth, async (req, res) => {
         <p>Dear ${user.full_name},</p>
         <p>We've received your deposit request for <strong>$${amt.toFixed(2)}</strong> via ${payment_method.replace('_', ' ')}.</p>
         <p>Your request is being reviewed and you'll be notified once processed.</p>
-        <p style="color:#666;font-size:13px">Top Global Investments &bull; freddy@bauerdavis.systems.com</p>
+        <p style="color:#666;font-size:13px">Top Global Investments &bull; freddy@bauerdavis-systems.com</p>
       </div>`
     });
 

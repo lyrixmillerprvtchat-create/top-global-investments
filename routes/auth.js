@@ -69,7 +69,7 @@ router.post('/register', signupLimiter, async (req, res) => {
         <p>Dear ${user.full_name},</p>
         <p>Your account has been successfully created and is currently <strong>pending admin approval</strong>.</p>
         <p>You will receive an email once your account has been reviewed. This usually takes 1–2 business days.</p>
-        <p style="color:#666;font-size:13px">Top Global Investments &bull; freddy@bauerdavis.systems.com</p>
+        <p style="color:#666;font-size:13px">Top Global Investments &bull; freddy@bauerdavis-systems.com</p>
       </div>`
     });
 
