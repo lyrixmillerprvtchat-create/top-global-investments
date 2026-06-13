@@ -40,11 +40,17 @@ app.use('/withdrawals', withdrawalRoutes);
 app.use('/admin', adminRoutes);
 app.use('/chat', chatRoutes);
 
+app.get('/api/ping', async (req, res) => {
+  const { error } = await supabase.from('users').select('id').limit(1);
+  if (error) return res.status(500).json({ ok: false, error: error.message });
+  res.json({ ok: true, ts: new Date().toISOString() });
+});
+
 app.get('/api/me', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Not authenticated' });
   const { data, error } = await supabase
     .from('users')
-    .select('id, email, full_name, balance, is_admin, created_at')
+    .select('id, email, full_name, balance, is_admin, is_approved, is_banned, created_at')
     .eq('id', req.session.userId)
     .single();
   if (error) return res.status(500).json({ error: 'Failed to load user' });
